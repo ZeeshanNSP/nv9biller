@@ -328,6 +328,14 @@ class Biller(object):
     def disable(self):
         """ Disable. """
         self._transmit(ssp.CMD_DISABLE)
+    def stacker(self):
+        r = self._transmit(ssp.CMD_POLL)
+        code = r[0]
+        if code == ssp.EVT_STACKER_FULL:
+            return True
+        else:
+            return False
+          
 
     def poll(self):
         """ Poll for events.

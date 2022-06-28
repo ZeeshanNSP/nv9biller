@@ -40,15 +40,48 @@ def NewUser(user):
         users.insert_one(user.toJson())
     except:
         pass
-
+@app.route("/ping-test")
+def ping():
+    import os
+    ip = "8.8.8.8"
+    response = os.popen(f"ping {ip}").read()
+    res = {}
+    if "Received = 4" in response:
+        res["status"] = "successfull"
+        res["log"] = response
+    else:
+        res["status"] = "unsuccessfull"
+        res["log"] = response
+    return res
+@app.route("/stacker_stat")
+def stat():
+    global biller
+    if biller is None:
+        try:
+            biller =Biller(PORT_USED)
+        except:
+            return "Machine Connection Problem"
+    else:
+        obj = {
+            "serial":biller.serial,
+            "counter":biller.counters,
+            "stacker_full":False
+        }
+        if biller.stacker() :
+            obj["stacker_full"] = True
+        return obj
 def Init_Biller():
     global biller
     if biller is None:
-        biller = Biller(PORT_USED)
+        try:
+            biller = Biller(PORT_USED)
+        except:
+            print("Machine Connection Problem")
 
 @app.route("/jwpTimeOut",methods=["GET","POST"])
 def TimeOut():
     global biller 
+    
     if request.method == "GET":
         f = p.printerTimeout("30","05830021351","JWP","1125","5",{})
         return "2500"
@@ -102,7 +135,6 @@ def getLogFileName():
     return dt_string
 @app.route("/printLog")
 def printLogFile():
-    time.sleep(3)
     p.printFile(getLogFileName()+".txt")
     return "DONE"
 def acceptMoney(port):
@@ -114,6 +146,7 @@ def acceptMoney(port):
     print('--------------------')
     print('Enabling biller...')
     biller.channels_set(biller.CH_ALL)
+
     biller.display_enable()
     biller.enable()
     while True:

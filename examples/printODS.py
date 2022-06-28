@@ -1,4 +1,7 @@
-from printer import printer,voucher
+from nv9biller import Biller
 
-printer("20","058365611561","CHECKING ","18484",True)
-voucher("SH02","15451","3215151561","P-30 [30 Days]")
+biller = Biller("COM1")
+t = biller.stacker()
+print(biller.counters)
+print(biller.counters_reset())
+print(biller.counters)
