@@ -3,6 +3,7 @@ from socket import timeout
 import sys
 import time
 from datetime import datetime
+from examples.models import PLAN
 import printer as p
 import time
 from nv9biller import Biller
@@ -10,9 +11,9 @@ import _thread as thread
 import threading 
 import pymongo
 from datetime import timedelta
-from flask import Flask, render_template,redirect,request,jsonify,session
+from flask import Flask, render_template,redirect,request,jsonify,session,abort
 from flask_cors import CORS
-from models import LOG,TRANSACTION,USER
+from models import LOG,TRANSACTION,USER,PLAN
 
 PORT_USED = "COM1"
 app = Flask(__name__)
@@ -48,16 +49,23 @@ def Init_Biller():
 @app.route("/jwpTimeOut",methods=["GET","POST"])
 def TimeOut():
     if request.method == "GET":
-        f = p.printerTimeout("30","05830021351","JWP","1125","5")
+        f = p.printerTimeout("30","05830021351","JWP","1125","5",{})
         return "2500"
     elif request.method == "POST":
         amt = request.form.get("amount")
         mobile = request.form.get("mobile")
         service = request.form.get("service")
         term = request.form.get("terminal")
+        name = request.form.get("profile")
+        pr = request.form.get("price")
+        valid = request.form.get("validity")
         rem = request.form.get("remaining")
-        print((amt,mobile,term,service,term))
-        t = p.printerTimeout(amt,mobile,service,term,rem)
+        print((amt,mobile,term,service,term,name,pr,valid))
+        pl = PLAN()
+        pl.price = pr
+        pl.profile = name
+        pl.validity = valid
+        t = p.printerTimeout(amt,mobile,service,term,rem,pl.toJson())
         transactions.insert_one(t)
         return "0025"
 
@@ -66,9 +74,9 @@ def TimeOut():
 def getDetailVerfication(reciept):
     query = {"receipt_id" : {"$eq":reciept}}
     r = transactions.find_one(query)
-    
+    res = {}
     if r is None:
-        return "404"
+        return res
     else:
         t= TRANSACTION()
         t.TID = r["TID"]
@@ -79,7 +87,11 @@ def getDetailVerfication(reciept):
         t.phone = r["phone"]
         t.pending_amount = r["pending_amount"]
         t.total_payment = r["total_payment"]
-        return t.toJson()
+        t.plan = r["plan"]
+        if int(t.pending_amount) == 0:
+            return res
+        res = t.toJson()
+        return res
 def getLogFileName():
     now = datetime.now()
     dt_string = now.strftime("%d%m%Y")

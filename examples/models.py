@@ -28,8 +28,17 @@ class USER:
     
     def toJson(self) -> dict:
         return self.__dict__
+class PLAN:
+    def __init__(self) -> None:
+        self.profile = None
+        self.validity = None
+        self.price  = None
 
-class TRANSACTION():
+    def toJson(self) -> dict:
+        return self.__dict__
+
+        
+class TRANSACTION:
     def __init__(self) -> None:
         self.TID = s.random(length=15)
         self.receipt_id = None
@@ -41,6 +50,7 @@ class TRANSACTION():
         self.service = None
         self.phone = None
         self.pending_amount = 0
+        self.plan = None
         self.total_payment = 0
 
     def toJson(self)-> dict:

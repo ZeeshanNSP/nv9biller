@@ -153,7 +153,7 @@ def printer(amount,contact_number,service_name,terminalId,com = False):
     hDC.EndDoc() 
     return "Done"
 
-def printerTimeout(amount,contact_number,service_name,terminalId,remaining):
+def printerTimeout(amount,contact_number,service_name,terminalId,remaining,plan):
     hDC = win32ui.CreateDC()
     printer_name = win32print.GetDefaultPrinter ()
     hDC.CreatePrinterDC(printer_name)
@@ -221,6 +221,7 @@ def printerTimeout(amount,contact_number,service_name,terminalId,remaining):
     trans.pending_amount = remaining
     trans.total_payment = str(int(remaining)+int(amount))
     trans.phone = contact_number
+    trans.plan = plan
     trans.service = service_name
     trans.receipt_id = id[0:5]
     return trans.toJson()
