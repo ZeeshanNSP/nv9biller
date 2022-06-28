@@ -37,7 +37,7 @@ class PLAN:
     def toJson(self) -> dict:
         return self.__dict__
 
-        
+
 class TRANSACTION:
     def __init__(self) -> None:
         self.TID = s.random(length=15)
@@ -67,4 +67,3 @@ class LOG:
     
     def toJson(self) -> dict:
         return self.__dict__
-

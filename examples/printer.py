@@ -152,7 +152,25 @@ def printer(amount,contact_number,service_name,terminalId,com = False):
     hDC.EndPage()
     hDC.EndDoc() 
     return "Done"
-
+def printCounter(jsonObj):
+    hDC = win32ui.CreateDC()
+    printer_name = win32print.GetDefaultPrinter ()
+    hDC.CreatePrinterDC(printer_name)
+    hDC.StartDoc('TESTING DOC')
+    hDC.StartPage()
+    fontsize = getfontsize(hDC, 9
+    )
+    fontdata = {'name': 'Aerial', 'height': fontsize ,'weight':win32con.FW_REGULAR}
+    font = win32ui.CreateFont(fontdata)
+    hDC.SelectObject(font)    
+    Y = 1
+    Y_distance = 30
+    for i in jsonObj:    
+        line = f"{i} : {jsonObj[i]}"
+        hDC.TextOut(10, Y,line)
+        Y += Y_distance
+    hDC.EndPage()
+    hDC.EndDoc() 
 def printerTimeout(amount,contact_number,service_name,terminalId,remaining,plan):
     hDC = win32ui.CreateDC()
     printer_name = win32print.GetDefaultPrinter ()

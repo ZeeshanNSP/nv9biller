@@ -28,6 +28,49 @@ users = mydb["users"]
 transactions = mydb["transactions"]
 logs = mydb["log"]
 
+@app.route("/print-counters")
+def printCounters():
+    f = getCounters()
+    p.printCounter(f)
+    return "DONE"
+
+@app.route("/cnt-rst")
+def resetCounters():
+    obj = {
+        "5":0,
+        "10":0,
+        "20":0,
+        "50":0,
+        "100":0,
+        "200":0,
+        "500":0
+    }
+    f = open("counters.json","w")
+    f.write(json.dumps(obj))
+    f.close()
+    return "Done"
+@app.route("/get-counter")
+def getCounters():
+    f = open("counters.json","r")
+    j  = json.load(f)
+    TOTAL = 0
+    for i in j:
+        TOTAL = TOTAL + int(i) * j[i]
+    j["total"] = TOTAL
+    f.close()
+    return j
+
+def updateCounter(k):
+    f = open("counters.json","r")
+    j = json.load(f)
+    f.close()
+    prev = j[k]
+    new = prev +1
+    j[k] = new
+    h = open("counters.json","w")
+    h.write(json.dumps(j))
+    h.close()
+
 def NewLog(log):
     l = LOG()
     l.log  = log
@@ -64,9 +107,10 @@ def stat():
     else:
         obj = {
             "serial":biller.serial,
-            "counter":biller.counters,
+            "counter":getCounters(),
             "stacker_full":False
         }
+        
         if biller.stacker() :
             obj["stacker_full"] = True
         return obj
@@ -129,6 +173,11 @@ def getDetailVerfication(reciept):
             return res
         res = t.toJson()
         return res
+
+@app.route("/testPagePrint")
+def testPage():
+    p.printFile("TESTPAGE.txt")
+    return "done"
 def getLogFileName():
     now = datetime.now()
     dt_string = now.strftime("%d%m%Y")
@@ -191,7 +240,7 @@ def enableBiller():
     biller.enable()      
 
     return "DONE"
-@app.route("/jwp-money/",methods = ["GET"])
+@app.route("/jwp-money",methods = ["GET"])
 def handleJWPMoney():
     return getJWP(PORT_USED)
 
@@ -240,7 +289,9 @@ def getJWP(port):
                     
                     if "Credit" in e:
                         r = e.split("->")[1].split()                  
-                        amount_credited = r[0]
+                        amount_credited = r[0]    
+                        print("[AMOUNT  ]",amount_credited)               
+                        updateCounter(amount_credited.split(".")[0])
                         DisableBiller()
                         f.close()
                         return amount_credited  
@@ -311,6 +362,7 @@ if __name__ == '__main__':
     threading.Thread(Init_Biller()).start()
     print("Waiting for Biller to INIT")
     while biller is None:
+        Init_Biller()
         time.sleep(0.5)
     if biller is not None:
         print("Init Biller Success")
