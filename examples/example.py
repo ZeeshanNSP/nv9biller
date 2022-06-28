@@ -49,9 +49,6 @@ def Init_Biller():
 @app.route("/jwpTimeOut",methods=["GET","POST"])
 def TimeOut():
     global biller 
-    biller.disable()
-    biller.display_disable()
-    biller.channels_set(None)
     if request.method == "GET":
         f = p.printerTimeout("30","05830021351","JWP","1125","5",{})
         return "2500"
@@ -71,6 +68,9 @@ def TimeOut():
         pl.validity = valid
         t = p.printerTimeout(amt,mobile,service,term,rem,pl.toJson())
         transactions.insert_one(t)
+        biller.disable()
+        biller.display_disable()
+        biller.channels_set(None)
         return "0025"
 
 
