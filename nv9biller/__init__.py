@@ -118,7 +118,9 @@ class Biller(object):
     """ tuple: Event codes. """
 
     def __init__(self, port):
+        
         self._s = serial.Serial(port, ssp.BAUDRATE, timeout=ssp.TIMEOUT)
+        
         self._crc = crcmod.mkCrcFun(ssp.CRC_POLY, rev=False,
                                     initCrc=ssp.CRC_INIT)
 
@@ -163,7 +165,8 @@ class Biller(object):
 
         while state != self._RX_STATE_FINISHED:
             if time.time() - init > ssp.TIMEOUT:
-                raise BillerCommunicationsError('Timeout')
+                #raise BillerCommunicationsError('Timeout')
+                pass
 
             data = self._s.read()
             if not data:
