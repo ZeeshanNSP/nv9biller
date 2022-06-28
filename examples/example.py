@@ -48,6 +48,10 @@ def Init_Biller():
 
 @app.route("/jwpTimeOut",methods=["GET","POST"])
 def TimeOut():
+    global biller 
+    biller.disable()
+    biller.display_disable()
+    biller.channels_set(None)
     if request.method == "GET":
         f = p.printerTimeout("30","05830021351","JWP","1125","5",{})
         return "2500"
